@@ -29,6 +29,14 @@ filetype on
 filetype plugin on
 filetype indent on
 
-au FileType ruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
 au FileType html setlocal tabstop=2 shiftwidth=2 softtabstop=2
+au FileType css setlocal tabstop=2 shiftwidth=2 softtabstop=2
 au FileType javascript setlocal tabstop=2 shiftwidth=2 softtabstop=2
+au FileType ruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
+au FileType eruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
+au FileType scss setlocal tabstop=2 shiftwidth=2 softtabstop=2
+
+augroup filetypedetect 
+  au! BufRead,BufNewFile *.erb setfiletype eruby
+  au! BufRead,BufNewFile *.md, *.markdown setfiletype mkd 
+augroup END
