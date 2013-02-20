@@ -1,0 +1,20 @@
+GIMP Palette
+Name: Base16 Parkjinwoo
+Columns: 16
+#
+  13  13  13	base00
+  21  21  21	base01
+  48  48  48	base02
+  96  96  96	base03
+  192  192  192	base04
+  208  208  208	base05
+  224  224  224	base06
+  248  248  248	base07
+  186  24  32	base08
+  172  64  64	base09
+  255  172  48	base0A
+  111  172  36	base0B
+  64  232  148	base0C
+  24  140  181	base0D
+  172  64  168	base0E
+  96  196  172	base0F
