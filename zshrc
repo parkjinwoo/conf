@@ -58,6 +58,7 @@ source $ZSH/oh-my-zsh.sh
 export PATH="/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin"
 # export MANPATH="/usr/local/man:$MANPATH"
 
+# alias ll='ls -alF'
 # alias mvim='/Applications/MacVim/mvim -v'
 
 # You may need to manually set your language environment
