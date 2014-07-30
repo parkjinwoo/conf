@@ -43,16 +43,16 @@ filetype on
 filetype plugin on
 filetype indent on
 
-"au FileType html setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"au FileType css setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"au FileType javascript setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"au FileType ruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"au FileType eruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"au FileType coffee setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"au FileType scss setlocal tabstop=2 shiftwidth=2 softtabstop=2
+"autocmd FileType html setlocal tabstop=2 shiftwidth=2 softtabstop=2
+"autocmd FileType css setlocal tabstop=2 shiftwidth=2 softtabstop=2
+"autocmd FileType javascript setlocal tabstop=2 shiftwidth=2 softtabstop=2
+"autocmd FileType ruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
+"autocmd FileType eruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
+"autocmd FileType coffee setlocal tabstop=2 shiftwidth=2 softtabstop=2
+"autocmd FileType scss setlocal tabstop=2 shiftwidth=2 softtabstop=2
 
 "augroup filetypedetect 
-"  au! BufRead,BufNewFile *.erb setfiletype eruby
-"  au! BufRead,BufNewFile *.coffee setfiletype coffee
-"  au! BufRead,BufNewFile *.md setfiletype markdown 
+"  autocmd! BufRead,BufNewFile *.erb set filetype=eruby
+"  autocmd! BufRead,BufNewFile *.coffee set filetype=coffee
+"  autocmd! BufRead,BufNewFile *.{md,mkd,markdown} set filetype=markdown 
 "augroup END
