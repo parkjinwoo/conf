@@ -9,4 +9,5 @@ alias ll='ls -alF'
 alias grep='grep --color=auto'
 # alias mvim='/Applications/MacVim/mvim -v'
 
-# source /Applications/SourceTree.app/Contents/Resources/git_local/contrib/completion/git-completion.bash
+# find /usr/local -type f -name "git-completion.bash" -print
+# source /usr/local/Cellar/git/x.x.x/etc/bash_completion.d/git-completion.bash
