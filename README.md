@@ -1,8 +1,6 @@
 conf
 ====
 
-.vimrc
-
 # [pathogen](https://github.com/tpope/vim-pathogen "pathogen")
 
     mkdir -p ~/.vim/autoload ~/.vim/bundle; \
@@ -15,8 +13,12 @@ conf
 
 # [Vim Bundle](https://github.com/parkjinwoo/conf/tree/my-vim-bundle "vim bundle")
 
-	cd ~/.vim/bundle
+    cd ~/.vim/bundle
     git clone -b my-vim-bundle https://github.com/parkjinwoo/conf.git myvim
+
+# vimrc
+    cd ~
+    curl -L https://github.com/parkjinwoo/conf/raw/master/vimrc > .vimrc
 
 # [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh "oh my zsh")
 
@@ -25,6 +27,9 @@ conf
     chsh -s /usr/local/bin/zsh
 
     curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
+    cd ~
+    curl -L https://github.com/parkjinwoo/conf/raw/master/zshrc > .zshrc
+    curl -L https://github.com/parkjinwoo/conf/raw/master/parkjinwoo.zsh-theme > .oh-my-zsh/themes/parkjinwoo.zsh-theme
 
 # git config
 
