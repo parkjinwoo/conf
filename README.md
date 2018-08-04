@@ -10,7 +10,7 @@ conf
 
     git clone https://github.com/scrooloose/nerdtree.git ~/.vim/bundle/nerdtree
 
-# vim config
+# vimrc
 
     mkdir -p ~/.vim/bundle/my/colors ~/.vim/bundle/my/syntax
     
