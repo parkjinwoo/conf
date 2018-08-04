@@ -26,8 +26,8 @@ conf
     echo "/usr/local/bin/zsh" >> /etc/shells
     chsh -s /usr/local/bin/zsh
 
-    curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
     cd ~
+    curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
     curl -L https://github.com/parkjinwoo/conf/raw/master/zshrc > .zshrc
     curl -L https://github.com/parkjinwoo/conf/raw/master/parkjinwoo.zsh-theme > .oh-my-zsh/themes/parkjinwoo.zsh-theme
 
