@@ -17,19 +17,18 @@ conf
     git clone -b my-vim-bundle https://github.com/parkjinwoo/conf.git myvim
 
 # vimrc
-    cd ~
-    curl -L https://github.com/parkjinwoo/conf/raw/master/vimrc > .vimrc
+    curl -LSso ~/.vimrc https://github.com/parkjinwoo/conf/raw/master/vimrc
 
 # [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh "oh my zsh")
 
     brew install zsh
     echo "/usr/local/bin/zsh" >> /etc/shells
     chsh -s /usr/local/bin/zsh
-
-    cd ~
+    
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-    curl -L https://github.com/parkjinwoo/conf/raw/master/zshrc > .zshrc
-    curl -L https://github.com/parkjinwoo/conf/raw/master/parkjinwoo.zsh-theme > .oh-my-zsh/themes/parkjinwoo.zsh-theme
+    
+    curl -LSso ~/.zshrc https://github.com/parkjinwoo/conf/raw/master/zshrc
+    curl -LSso ~/.oh-my-zsh/themes/parkjinwoo.zsh-theme https://github.com/parkjinwoo/conf/raw/master/parkjinwoo.zsh-theme
 
 # git config
 
