@@ -47,12 +47,7 @@ filetype indent on
 "autocmd FileType css setlocal tabstop=2 shiftwidth=2 softtabstop=2
 "autocmd FileType javascript setlocal tabstop=2 shiftwidth=2 softtabstop=2
 "autocmd FileType ruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"autocmd FileType eruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"autocmd FileType coffee setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"autocmd FileType scss setlocal tabstop=2 shiftwidth=2 softtabstop=2
 
-"augroup filetypedetect 
-"  autocmd! BufRead,BufNewFile *.erb set filetype=eruby
-"  autocmd! BufRead,BufNewFile *.coffee set filetype=coffee
+"augroup filetypedetect
 "  autocmd! BufRead,BufNewFile *.{md,mkd,markdown} set filetype=markdown 
 "augroup END
