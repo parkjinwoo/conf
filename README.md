@@ -10,12 +10,13 @@ conf
 
     git clone https://github.com/scrooloose/nerdtree.git ~/.vim/bundle/nerdtree
 
-# [Vim Bundle](https://github.com/parkjinwoo/conf/tree/my-vim-bundle "vim bundle")
+# Vim
 
-    git clone -b my-vim-bundle https://github.com/parkjinwoo/conf.git ~/.vim/bundle/myvim
-
-# vimrc
-
+    mkdir -p ~/.vim/bundle/my/colors ~/.vim/bundle/my/syntax
+    curl -LSso ~/.vim/bundle/my/colors/base16-parkjinwoo.vim \
+    https://github.com/parkjinwoo/conf/raw/master/colors/base16-parkjinwoo.vim
+    curl -LSso ~/.vim/bundle/my/syntax/python.vim \
+    https://www.vim.org/scripts/download_script.php?src_id=21056
     curl -LSso ~/.vimrc https://github.com/parkjinwoo/conf/raw/master/vimrc
 
 # [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh "oh my zsh")
