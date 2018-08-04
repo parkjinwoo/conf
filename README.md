@@ -27,7 +27,7 @@ conf
     chsh -s /usr/local/bin/zsh
 
     cd ~
-    curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | sh
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
     curl -L https://github.com/parkjinwoo/conf/raw/master/zshrc > .zshrc
     curl -L https://github.com/parkjinwoo/conf/raw/master/parkjinwoo.zsh-theme > .oh-my-zsh/themes/parkjinwoo.zsh-theme
 
