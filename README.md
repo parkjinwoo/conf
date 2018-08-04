@@ -8,15 +8,14 @@ conf
 
 # [nerdtree](https://github.com/scrooloose/nerdtree "nerdtree")
 
-    cd ~/.vim/bundle
-    git clone https://github.com/scrooloose/nerdtree.git
+    git clone https://github.com/scrooloose/nerdtree.git ~/.vim/bundle/nerdtree
 
 # [Vim Bundle](https://github.com/parkjinwoo/conf/tree/my-vim-bundle "vim bundle")
 
-    cd ~/.vim/bundle
-    git clone -b my-vim-bundle https://github.com/parkjinwoo/conf.git myvim
+    git clone -b my-vim-bundle https://github.com/parkjinwoo/conf.git ~/.vim/bundle/myvim
 
 # vimrc
+
     curl -LSso ~/.vimrc https://github.com/parkjinwoo/conf/raw/master/vimrc
 
 # [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh "oh my zsh")
@@ -32,8 +31,8 @@ conf
 
 # git config
 
-    git config --global user.name "name"
-    git config --global user.email id@email.com
+    git config --global user.name "${name}"
+    git config --global user.email ${email}
     git config --global core.editor vim
     git config --global color.ui true
     git config --global alias.ll "log --graph --all --format=format:'%C(blue)%h%C(reset) %C(yellow)%d%C(reset) %C(green)%s%C(reset) %C(red)(%ar)%C(reset) %C(bold cyan)— %an%C(reset)' --abbrev-commit --date=relative"
