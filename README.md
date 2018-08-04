@@ -13,10 +13,13 @@ conf
 # Vim
 
     mkdir -p ~/.vim/bundle/my/colors ~/.vim/bundle/my/syntax
+    
     curl -LSso ~/.vim/bundle/my/colors/base16-parkjinwoo.vim \
     https://github.com/parkjinwoo/conf/raw/master/colors/base16-parkjinwoo.vim
+    
     curl -LSso ~/.vim/bundle/my/syntax/python.vim \
     https://www.vim.org/scripts/download_script.php?src_id=21056
+    
     curl -LSso ~/.vimrc https://github.com/parkjinwoo/conf/raw/master/vimrc
 
 # [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh "oh my zsh")
@@ -27,8 +30,11 @@ conf
     
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
     
+    curl -LSso ~/.oh-my-zsh/themes/parkjinwoo.zsh-theme \
+    https://github.com/parkjinwoo/conf/raw/master/parkjinwoo.zsh-theme
+    
     curl -LSso ~/.zshrc https://github.com/parkjinwoo/conf/raw/master/zshrc
-    curl -LSso ~/.oh-my-zsh/themes/parkjinwoo.zsh-theme https://github.com/parkjinwoo/conf/raw/master/parkjinwoo.zsh-theme
+
 
 # git config
 
