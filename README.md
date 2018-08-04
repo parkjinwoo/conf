@@ -3,7 +3,7 @@ conf
 
 # [pathogen](https://github.com/tpope/vim-pathogen "pathogen")
 
-    mkdir -p ~/.vim/autoload ~/.vim/bundle; \
+    mkdir -p ~/.vim/autoload ~/.vim/bundle && \
     curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
 
 # [nerdtree](https://github.com/scrooloose/nerdtree "nerdtree")
