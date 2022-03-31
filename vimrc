@@ -27,7 +27,6 @@ set termencoding=utf-8
 "set fileformat=unix
 set history=1000
 set undolevels=1000
-"colorscheme base16-parkjinwoo
 set background=dark
 "set mouse=a
 
