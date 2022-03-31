@@ -2,14 +2,6 @@ conf
 ====
 
 # vimrc
-
-    mkdir -p ~/.vim/bundle/my/colors ~/.vim/bundle/my/syntax
-    
-    curl -LSso ~/.vim/bundle/my/colors/base16-parkjinwoo.vim \
-    https://github.com/parkjinwoo/conf/raw/master/colors/base16-parkjinwoo.vim
-    
-    curl -LSso ~/.vim/bundle/my/syntax/python.vim \
-    https://www.vim.org/scripts/download_script.php?src_id=21056
     
     curl -LSso ~/.vimrc https://github.com/parkjinwoo/conf/raw/master/vimrc
 
