@@ -1,5 +1,3 @@
-execute pathogen#infect()
-
 syntax on
 
 set nocompatible
@@ -33,12 +31,6 @@ set undolevels=1000
 set background=dark
 "set mouse=a
 
-if has("gui_macvim")
-  set guifont=Menlo:h16.00
-  set transparency=15
-  set noimdisable
-endif
-
 filetype on
 filetype plugin on
 filetype indent on
@@ -46,7 +38,6 @@ filetype indent on
 "autocmd FileType html setlocal tabstop=2 shiftwidth=2 softtabstop=2
 "autocmd FileType css setlocal tabstop=2 shiftwidth=2 softtabstop=2
 "autocmd FileType javascript setlocal tabstop=2 shiftwidth=2 softtabstop=2
-"autocmd FileType ruby setlocal tabstop=2 shiftwidth=2 softtabstop=2
 
 "augroup filetypedetect
 "  autocmd! BufRead,BufNewFile *.{md,mkd,markdown} set filetype=markdown 
