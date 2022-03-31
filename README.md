@@ -1,15 +1,6 @@
 conf
 ====
 
-# [pathogen](https://github.com/tpope/vim-pathogen "pathogen")
-
-    mkdir -p ~/.vim/autoload ~/.vim/bundle && \
-    curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
-
-# [nerdtree](https://github.com/scrooloose/nerdtree "nerdtree")
-
-    git clone https://github.com/scrooloose/nerdtree.git ~/.vim/bundle/nerdtree
-
 # vimrc
 
     mkdir -p ~/.vim/bundle/my/colors ~/.vim/bundle/my/syntax
@@ -21,20 +12,6 @@ conf
     https://www.vim.org/scripts/download_script.php?src_id=21056
     
     curl -LSso ~/.vimrc https://github.com/parkjinwoo/conf/raw/master/vimrc
-
-# [Oh My Zsh](https://github.com/robbyrussell/oh-my-zsh "oh my zsh")
-
-    brew install zsh
-    echo "/usr/local/bin/zsh" >> /etc/shells
-    chsh -s /usr/local/bin/zsh
-    
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-    
-    curl -LSso ~/.oh-my-zsh/themes/parkjinwoo.zsh-theme \
-    https://github.com/parkjinwoo/conf/raw/master/parkjinwoo.zsh-theme
-    
-    curl -LSso ~/.zshrc https://github.com/parkjinwoo/conf/raw/master/zshrc
-
 
 # git config
 
