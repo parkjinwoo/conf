@@ -18,6 +18,7 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 alias ll='ls -alF --color=auto'
+alias grep='grep --color=auto'
 ```
 
 # git config
