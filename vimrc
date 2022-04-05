@@ -28,8 +28,10 @@ set termencoding=utf-8
 "set fileformat=unix
 set history=1000
 set undolevels=1000
-set background=dark
 "set mouse=a
+set termguicolors
+set background=dark
+"colorscheme default
 
 filetype on
 filetype plugin on
