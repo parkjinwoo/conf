@@ -2,6 +2,7 @@ syntax on
 
 set nocompatible
 set cindent
+set autoindent
 set smartindent
 set tabstop=4
 set shiftwidth=4 
@@ -10,7 +11,7 @@ set expandtab " noexpandtab
 "set colorcolumn=80
 highlight OverLength ctermbg=red ctermfg=white guibg=#996666
 "set textwidth=79
-"set wrap
+set nowrap " wrap
 set hlsearch
 set incsearch
 "set ingnorecase
