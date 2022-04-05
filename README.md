@@ -27,5 +27,6 @@ git config --global user.name "${name}"
 git config --global user.email ${email}
 git config --global core.editor vim
 git config --global color.ui true
-git config --global alias.ll "log --graph --all --format=format:'%C(blue)%h%C(reset) %C(yellow)%d%C(reset) %C(green)%s%C(reset) %C(red)(%ar)%C(reset) %C(bold cyan)— %an%C(reset)' --abbrev-commit --date=relative"
+git config --global alias.ll "log --graph --abbrev-commit --all --decorate --format=format:'%C(bold blue)%h%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset) %C(green)%aD%C(reset) %C(cyan)(%ar)%C(reset)%C(yellow)%d%C(reset)'"
+git config --global alias.lg "log --graph --abbrev-commit --all --decorate --format=format:'%C(bold blue)%h%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%n''         %C(green)%aD%C(reset) %C(cyan)(%ar)%C(reset)%C(yellow)%d%C(reset)'"
 ```
