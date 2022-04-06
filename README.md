@@ -1,7 +1,7 @@
 conf
 ====
 
-# [vim-plug](https://github.com/junegunn/vim-plug)
+## [vim-plug](https://github.com/junegunn/vim-plug)
 
 - vim
 ```
@@ -14,19 +14,19 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 ```
 
-# vimrc
+## vimrc
 
 ```
 curl -LSso ~/.vimrc https://github.com/parkjinwoo/conf/raw/master/vimrc
 ```
  
-# [zinit](https://github.com/zdharma-continuum/zinit)
+## [zinit](https://github.com/zdharma-continuum/zinit)
 
 ```
 sh -c "$(curl -fsSL https://git.io/zinit-install)"
 ```
 
-# zshrc
+## zshrc
 
 ```
 zinit ice depth=1; zinit light romkatv/powerlevel10k
@@ -45,7 +45,7 @@ alias ll='ls -alF --color=auto'
 alias grep='grep --color=auto'
 ```
 
-# git config
+## git config
 
 ```
 git config --global user.name "${name}"
