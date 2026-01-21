@@ -45,6 +45,36 @@ alias ll='ls -alF --color=auto'
 alias grep='grep --color=auto'
 ```
 
+## homebrew
+
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew install wget
+brew install mise
+brew install jq
+brew install fzf
+```
+
+## AstroNvim
+
+```sh
+## Requirements
+brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install --cask {} || true
+brew install neovim
+brew install tree-sitter-cli
+
+## Optional Requirements
+brew install ripgrep
+brew install lazygit
+brew install gdu
+brew install bottom
+
+## Installation
+git clone --depth 1 https://github.com/AstroNvim/template ~/.config/nvim
+rm -rf ~/.config/nvim/.git
+```
+
 ## git config
 
 ```
