@@ -1,25 +1,6 @@
 conf
 ====
 
-## [vim-plug](https://github.com/junegunn/vim-plug)
-
-- vim
-```
-curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-```
-- neovim
-```
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
-```
-
-## vimrc
-
-```
-curl -LSso ~/.vimrc https://github.com/parkjinwoo/conf/raw/master/vimrc
-```
- 
 ## [zinit](https://github.com/zdharma-continuum/zinit)
 
 ```
@@ -56,6 +37,12 @@ brew install jq
 brew install fzf
 ```
 
+## ghostty
+```sh
+brew install ghostty
+curl -fLo ~/.config/ghostty/config --create-dirs https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/ghostty_config
+```
+
 ## AstroNvim
 
 ```sh
@@ -73,6 +60,25 @@ brew install bottom
 ## Installation
 git clone --depth 1 https://github.com/AstroNvim/template ~/.config/nvim
 rm -rf ~/.config/nvim/.git
+```
+
+## vimrc
+
+```
+curl -LSso ~/.vimrc https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/vimrc
+```
+
+## [vim-plug](https://github.com/junegunn/vim-plug)
+
+- vim
+```
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+```
+- neovim
+```
+sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 ```
 
 ## git config
