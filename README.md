@@ -38,6 +38,15 @@ brew install fzf
 brew install zellij
 brew install lazygit
 brew install git-delta
+brew install bitwarden-cli
+
+brew install --cask google-chrome
+brew install --cask firefox
+brew install --cask rectangle
+brew install --cask bitwarden
+brew install --cask visual-studio-code
+brew install --cask zed
+brew install --cask notion
 ```
 
 ## ghostty
