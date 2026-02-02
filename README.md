@@ -94,10 +94,31 @@ sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.
 ## git config
 
 ```
-git config --global user.name "${name}"
-git config --global user.email ${email}
-git config --global core.editor vim
-git config --global color.ui true
-git config --global alias.ll "log --graph --abbrev-commit --all --decorate --format=format:'%C(bold blue)%h%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset) %C(green)%aD%C(reset) %C(cyan)(%ar)%C(reset)%C(yellow)%d%C(reset)'"
-git config --global alias.lg "log --graph --abbrev-commit --all --decorate --format=format:'%C(bold blue)%h%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%n''         %C(green)%aD%C(reset) %C(cyan)(%ar)%C(reset)%C(yellow)%d%C(reset)'"
+# 기본 설정
+git config --global user.name "My Name"
+git config --global user.email "my@email.com"
+git config --global core.editor nvim
+git config --global init.defaultBranch main
+
+# git-delta 사용 시 (brew install git-delta)
+git config --global core.pager delta
+git config --global interactive.diffFilter "delta --color-only"
+git config --global delta.navigate true
+git config --global delta.dark true
+git config --global merge.conflictStyle zdiff3
+
+# 편의 설정
+git config --global push.autoSetupRemote true
+git config --global fetch.prune true
+git config --global pull.rebase true
+git config --global rebase.autoStash true
+git config --global rerere.enabled true
+git config --global diff.colorMoved default
+git config --global branch.sort -committerdate
+
+# git kit
+curl -fLo ~/.local/bin/git-gk --create-dirs \
+    https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/git-gk.sh
+chmod +x ~/.local/bin/git-gk
+git config --global alias.gk '!git-gk'
 ```
