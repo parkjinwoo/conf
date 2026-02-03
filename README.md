@@ -48,6 +48,7 @@ alias grep='grep --color=auto'
 # btop: 시스템 모니터 (htop 대체)
 # dust: 디스크 사용량 시각화 (du 대체)
 # procs: 프로세스 뷰어 (ps 대체)
+# procs: 작업 병렬 실행
 # bitwarden-cli: 비밀번호 관리자 CLI
 brew install \
   wget \
@@ -66,6 +67,7 @@ brew install \
   btop \
   dust \
   procs \
+  parallel \
   bitwarden-cli
 
 # GUI 앱
