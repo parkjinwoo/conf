@@ -177,15 +177,74 @@ brew install \
   lazydocker
 
 # podman machine
+# 기본 설정으로 초기화 및 시작
 podman machine init
 podman machine start
+
+# 커스텀 리소스로 초기화 (cpus: 코어 수, memory: MB, disk-size: GB)
+podman machine init --cpus=4 --memory=4096 --disk-size=100
+
+# 볼륨 마운트가 필요한 경우 (init 시점에 설정)
+podman machine init -v $HOME:$HOME
+
+# 마운트 볼륨 권한 문제 시
+podman machine init -v $HOME:$HOME:z
+
+# rootful
+podman machine set --rootful
+podman machine stop && podman machine start
+
+# VM 내부에서 unprivileged port 설정 변경
+podman machine ssh sudo sysctl -w net.ipv4.ip_unprivileged_port_start=0
+
+# 또는 컨테이너 실행 시 옵션 추가 (non-root 사용자인 경우)
+podman run -it --rm --cap-add net_bind_service my/image
+
+# 애플 실리콘에서 arm64 또는 multi-arch 이미지는 네이티브로 실행됨. amd64 전용 이미지 실행이 필요한 경우.
+podman machine ssh sudo rpm-ostree install qemu-user-static
+podman machine ssh sudo systemctl reboot
+
+# etc
+podman machine info
+podman machine rm
+podman machine ssh
+podman system prune
+
+# Podman 소켓 활성화 (Linux) / macOS에서는 podman machine 시작 시 자동 활성화
+systemctl --user start podman.socket
 
 podman run -it ubuntu bash
 podman ps
 podman images
-podman-compose up -d
+alias docker=podman
 
 # lazydocker .zshrc에 추가
 export DOCKER_HOST="unix://$HOME/.local/share/containers/podman/machine/podman.sock"
 
+# Private Registry 로그인
+podman login registry.example.com
+
+# Multi-arch 이미지 빌드
+podman build --platform linux/arm64,linux/amd64 --format docker -t my-image .
+```
+
+# podman compose
+
+```sh
+podman-compose up -d
+```
+
+```yaml
+# 호스트 접근 (컨테이너 → 호스트) docker-compose.yml 예시 Docker의 host.docker.internal 대신 host.containers.internal을 사용
+services:
+  web:
+    image: nginx
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Docker 호환
+```
+
+# 또는 컨테이너 내부에서
+
+```sh
+curl http://host.containers.internal:8080
 ```
