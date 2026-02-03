@@ -71,6 +71,7 @@ brew install \
 # GUI 앱
 # google-chrome: 크롬 브라우저
 # firefox: 파이어폭스 브라우저
+# naver-whale: 웨일 브라우저
 # rectangle: 윈도우 창 관리 (단축키)
 # visual-studio-code: 코드 에디터
 # zed: 초고속 코드 에디터 (Rust 기반)
@@ -79,6 +80,7 @@ brew install \
 brew install --cask \
   google-chrome \
   firefox \
+  naver-whale \
   rectangle \
   visual-studio-code \
   zed \
