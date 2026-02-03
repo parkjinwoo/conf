@@ -3,13 +3,13 @@ conf
 
 ## [zinit](https://github.com/zdharma-continuum/zinit)
 
-```
+```sh
 sh -c "$(curl -fsSL https://git.io/zinit-install)"
 ```
 
 ## zshrc
 
-```
+```sh
 zinit ice depth=1; zinit light romkatv/powerlevel10k
 zinit ice blockf atpull'zinit creinstall -q .'; zinit light zsh-users/zsh-completions
 zicompinit
@@ -31,22 +31,59 @@ alias grep='grep --color=auto'
 ```sh
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-brew install wget
-brew install mise
-brew install jq
-brew install fzf
-brew install zellij
-brew install lazygit
-brew install git-delta
-brew install bitwarden-cli
+# CLI 도구
+# wget: HTTP/FTP 다운로더
+# jq: JSON 파서/필터
+# fzf: 퍼지 파인더
+# zellij: 터미널 멀티플렉서 (tmux 대체)
+# mise: 개발 도구 버전 관리 (asdf 대체)
+# gh: GitHub CLI
+# lazygit: Git TUI 클라이언트
+# git-delta: Git diff 구문 강조
+# ripgrep: 초고속 검색 (grep 대체)
+# fd: 직관적인 파일 찾기 (find 대체)
+# eza: 모던 ls (아이콘/Git 상태)
+# bat: 구문 강조 cat
+# zoxide: 스마트 cd (디렉토리 학습)
+# btop: 시스템 모니터 (htop 대체)
+# dust: 디스크 사용량 시각화 (du 대체)
+# procs: 프로세스 뷰어 (ps 대체)
+# bitwarden-cli: 비밀번호 관리자 CLI
+brew install \
+  wget \
+  jq \
+  fzf \
+  zellij \
+  mise \
+  gh \
+  lazygit \
+  git-delta \
+  ripgrep \
+  fd \
+  eza \
+  bat \
+  zoxide \
+  btop \
+  dust \
+  procs \
+  bitwarden-cli
 
-brew install --cask google-chrome
-brew install --cask firefox
-brew install --cask rectangle
-brew install --cask bitwarden
-brew install --cask visual-studio-code
-brew install --cask zed
-brew install --cask notion
+# GUI 앱
+# google-chrome: 크롬 브라우저
+# firefox: 파이어폭스 브라우저
+# rectangle: 윈도우 창 관리 (단축키)
+# visual-studio-code: 코드 에디터
+# zed: 초고속 코드 에디터 (Rust 기반)
+# bitwarden: 비밀번호 관리자
+# notion: 노트/문서 협업 도구
+brew install --cask \
+  google-chrome \
+  firefox \
+  rectangle \
+  visual-studio-code \
+  zed \
+  bitwarden \
+  notion
 ```
 
 ## ghostty
@@ -83,21 +120,21 @@ rm -rf ~/.config/nvim/.git
 
 ## vimrc
 
-```
+```sh
 curl -LSso ~/.vimrc https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/vimrc
 ```
 
 ## [vim-plug](https://github.com/junegunn/vim-plug)
 
 - vim
-```
+```sh
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 ```
 
 ## git config
 
-```
+```sh
 # 기본 설정
 git config --global user.name "My Name"
 git config --global user.email "my@email.com"
@@ -125,4 +162,30 @@ curl -fLo ~/.local/bin/git-gk --create-dirs \
     https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/git-gk.sh
 chmod +x ~/.local/bin/git-gk
 git config --global alias.gk '!git-gk'
+```
+
+## Podman
+
+```sh
+# Podman 컨테이너 도구
+# podman: Docker 대체 컨테이너 엔진 (데몬리스, 루트리스)
+# podman-compose: docker-compose 대체
+# lazydocker: 컨테이너 관리 TUI
+brew install \
+  podman \
+  podman-compose \
+  lazydocker
+
+# podman machine
+podman machine init
+podman machine start
+
+podman run -it ubuntu bash
+podman ps
+podman images
+podman-compose up -d
+
+# lazydocker .zshrc에 추가
+export DOCKER_HOST="unix://$HOME/.local/share/containers/podman/machine/podman.sock"
+
 ```
