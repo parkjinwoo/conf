@@ -4,7 +4,7 @@ conf
 ## [zinit](https://github.com/zdharma-continuum/zinit)
 
 ```sh
-sh -c "$(curl -fsSL https://git.io/zinit-install)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma-continuum/zinit/HEAD/scripts/install.sh)"
 ```
 
 ## zshrc
@@ -22,7 +22,11 @@ bindkey '^[[B' history-substring-search-down
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-alias ll='ls -alF --color=auto'
+if command -v gls >/dev/null 2>&1; then
+  alias ll='gls -alF --color=auto'
+else
+  alias ll='ls -alG'
+fi
 alias grep='grep --color=auto'
 ```
 
@@ -36,6 +40,7 @@ alias grep='grep --color=auto'
 # jq: JSON 파서/필터
 # fzf: 퍼지 파인더
 # zellij: 터미널 멀티플렉서 (tmux 대체)
+# tmux: 터미널 멀티플렉서 (macOS 기본 미포함 환경 대비)
 # mise: 개발 도구 버전 관리 (asdf 대체)
 # gh: GitHub CLI
 # lazygit: Git TUI 클라이언트
@@ -48,13 +53,17 @@ alias grep='grep --color=auto'
 # btop: 시스템 모니터 (htop 대체)
 # dust: 디스크 사용량 시각화 (du 대체)
 # procs: 프로세스 뷰어 (ps 대체)
-# procs: 작업 병렬 실행
+# parallel: 작업 병렬 실행
+# yq: YAML/JSON 프로세서 (jq 스타일)
+# uv: 빠른 Python 패키지/가상환경 관리
+# shellcheck: 쉘 스크립트 정적 분석
 # bitwarden-cli: 비밀번호 관리자 CLI
 brew install \
   wget \
   jq \
   fzf \
   zellij \
+  tmux \
   mise \
   gh \
   lazygit \
@@ -68,6 +77,9 @@ brew install \
   dust \
   procs \
   parallel \
+  yq \
+  uv \
+  shellcheck \
   bitwarden-cli
 
 # GUI 앱
@@ -79,6 +91,7 @@ brew install \
 # zed: 초고속 코드 에디터 (Rust 기반)
 # bitwarden: 비밀번호 관리자
 # notion: 노트/문서 협업 도구
+# obsidian: 로컬 우선 노트/지식관리 도구
 brew install --cask \
   google-chrome \
   firefox \
@@ -87,7 +100,8 @@ brew install --cask \
   visual-studio-code \
   zed \
   bitwarden \
-  notion
+  notion \
+  obsidian
 ```
 
 ## ghostty
@@ -165,75 +179,7 @@ git config --global branch.sort -committerdate
 curl -fLo ~/.local/bin/git-gk --create-dirs \
     https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/git-gk.sh
 chmod +x ~/.local/bin/git-gk
+# ~/.local/bin이 PATH에 없다면:
+# export PATH="$HOME/.local/bin:$PATH"
 git config --global alias.gk '!git-gk'
-```
-
-## Podman
-
-```sh
-# Podman 컨테이너 도구
-# podman: Docker 대체 컨테이너 엔진 (데몬리스, 루트리스)
-# podman-compose: docker-compose 대체
-# lazydocker: 컨테이너 관리 TUI
-brew install \
-  podman \
-  podman-compose \
-  lazydocker
-
-# podman machine
-podman machine init    # 기본 설정으로 초기화
-podman machine start   # 시작
-podman machine init --cpus=4 --memory=4096 --disk-size=100 # 커스텀 리소스로 초기화 (cpus: 코어 수, memory: MB, disk-size: GB)
-podman machine init -v $HOME:$HOME   # 볼륨 마운트가 필요한 경우 (init 시점에 설정)
-podman machine init -v $HOME:$HOME:z # 마운트 볼륨 권한 문제 시
-
-podman machine set --rootful # rootful (재시작 필요)
-podman machine ssh sudo sysctl -w net.ipv4.ip_unprivileged_port_start=0 # VM 내부에서 unprivileged port 설정 변경
-podman run -it --rm --cap-add net_bind_service my/image # 또는 컨테이너 실행 시 옵션 추가 (non-root 사용자인 경우)
-
-# 애플 실리콘에서 arm64 또는 multi-arch 이미지는 네이티브로 실행됨. amd64 전용 이미지 실행이 필요한 경우.
-podman machine ssh sudo rpm-ostree install qemu-user-static
-podman machine ssh sudo systemctl reboot
-
-# etc
-podman machine info
-podman machine ls
-podman machine rm
-podman machine ssh
-podman system prune
-podman run -it ubuntu bash
-podman ps
-podman images
-podman login registry.example.com # Private Registry 로그인
-
-# Podman 소켓 활성화 (Linux) / macOS에서는 podman machine 시작 시 자동 활성화
-systemctl --user start podman.socket
-
-# .zshrc에 추가
-export DOCKER_HOST="unix://$HOME/.local/share/containers/podman/machine/podman.sock"
-alias docker=podman
-
-# Multi-arch 이미지 빌드
-podman build --platform linux/arm64,linux/amd64 --format docker -t my-image .
-```
-
-# podman compose
-
-```sh
-podman-compose up -d
-```
-
-```yaml
-# 호스트 접근 (컨테이너 → 호스트) docker-compose.yml 예시 Docker의 host.docker.internal 대신 host.containers.internal을 사용
-services:
-  web:
-    image: nginx
-    extra_hosts:
-      - "host.docker.internal:host-gateway"  # Docker 호환
-```
-
-# 또는 컨테이너 내부에서
-
-```sh
-curl http://host.containers.internal:8080
 ```
