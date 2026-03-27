@@ -92,6 +92,8 @@ brew install \
 # bitwarden: 비밀번호 관리자
 # notion: 노트/문서 협업 도구
 # obsidian: 로컬 우선 노트/지식관리 도구
+# ghostty: GPU 가속 터미널
+# wezterm: Lua 설정 가능한 GPU 가속 터미널
 brew install --cask \
   google-chrome \
   firefox \
@@ -101,12 +103,13 @@ brew install --cask \
   zed \
   bitwarden \
   notion \
-  obsidian
+  obsidian \
+  ghostty \
+  wezterm
 ```
 
 ## ghostty
 ```sh
-brew install ghostty
 curl -fLo ~/.config/ghostty/config --create-dirs \
     https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/ghostty_config
 ```
@@ -114,18 +117,10 @@ curl -fLo ~/.config/ghostty/config --create-dirs \
 ## zellij
 
 ```sh
-# 레이아웃 파일 설치 (GitHub에서 바로 다운로드)
 curl -fLo ~/.config/zellij/layouts/agent.kdl --create-dirs \
     https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/zellij-agent-layout.kdl
 
-# 실행: 왼쪽 agent, 오른쪽 editor(nvim) / git(lazygit) / term
 zellij -l agent
-
-# 실행 후 비율 미세 조정 (현재 포커스 pane 기준)
-# 예) 경계선을 오른쪽으로 밀어 현재 pane 영역 확장
-zellij action resize increase right
-# 예) 경계선을 오른쪽에서 당겨 현재 pane 영역 축소
-zellij action resize decrease right
 ```
 
 ## AstroNvim
@@ -165,6 +160,24 @@ curl -LSso ~/.vimrc https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads
 ```sh
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+```
+
+## tmux
+
+```sh
+curl -fLo ~/.config/tmux/tmux.conf --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux.conf
+
+curl -fLo ~/.config/tmux/scripts/statusbar.sh --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_scripts_statusbar.sh
+
+curl -fLo ~/.config/tmux/layouts/agent.conf --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_agent.conf
+
+chmod +x ~/.config/tmux/scripts/statusbar.sh
+
+# 레이아웃 실행
+tmux new-session \; source-file ~/.config/tmux/layouts/agent.conf
 ```
 
 ## git config

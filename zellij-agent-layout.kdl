@@ -1,20 +1,24 @@
 layout {
+    // 1. 상단 탭 바
+    pane size=1 borderless=true {
+        plugin location="zellij:tab-bar"
+    }
+
+    // 2. 메인 작업 영역
     pane split_direction="vertical" {
-        // 왼쪽: 이름 'agent'
+        // 왼쪽: 이름 'agent' (전체 화면의 50% 차지)
         pane name="agent" size="50%"
 
-        // 오른쪽: 세 개의 창 (editor, git, term)
-        pane size="50%" split_direction="horizontal" {
-            // 위: nvim 실행
+        // 오른쪽: 세 개의 창이 겹쳐 있는 구조 (Stacked)
+        // stacked=true를 부모 pane에 설정하여 내부 창들을 아코디언 형태로 만듭니다.
+        pane size="50%" split_direction="horizontal" stacked=true {
             pane name="editor" command="nvim"
-            // 중간: lazygit 실행
             pane name="git" command="lazygit"
-            // 아래: 기본 터미널
             pane name="term"
         }
     }
 
-    // 하단 기본 상태바
+    // 3. 하단 상태바
     pane size=1 borderless=true {
         plugin location="zellij:status-bar"
     }
