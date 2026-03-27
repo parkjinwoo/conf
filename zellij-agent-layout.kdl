@@ -1,20 +1,21 @@
 layout {
-    default_tab_template {
-        pane size=1 borderless=true {
-            plugin location="zellij:tab-bar"
-        }
-        children
-        pane size=2 borderless=true {
-            plugin location="zellij:status-bar"
+    pane split_direction="vertical" {
+        // 왼쪽: 이름 'agent'
+        pane name="agent" size="50%"
+
+        // 오른쪽: 세 개의 창 (editor, git, term)
+        pane size="50%" split_direction="horizontal" {
+            // 위: nvim 실행
+            pane name="editor" command="nvim"
+            // 중간: lazygit 실행
+            pane name="git" command="lazygit"
+            // 아래: 기본 터미널
+            pane name="term"
         }
     }
 
-    tab name="agent-layout" split_direction="vertical" {
-        pane name="agent" size="50%" focus=true
-        pane split_direction="horizontal" size="50%" {
-            pane name="editor" command="nvim"
-            pane name="git" command="lazygit"
-            pane name="term"
-        }
+    // 하단 기본 상태바
+    pane size=1 borderless=true {
+        plugin location="zellij:status-bar"
     }
 }
