@@ -174,10 +174,13 @@ curl -fLo ~/.config/tmux/scripts/statusbar.sh --create-dirs \
 curl -fLo ~/.config/tmux/layouts/agent.conf --create-dirs \
   https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_agent.conf
 
-chmod +x ~/.config/tmux/scripts/statusbar.sh
+curl -fLo ~/.config/tmux/layouts/4.conf --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_4.conf
 
-# 레이아웃 실행
-tmux new-session \; source-file ~/.config/tmux/layouts/agent.conf
+curl -fLo ~/.config/tmux/layouts/9.conf --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_9.conf
+
+chmod +x ~/.config/tmux/scripts/statusbar.sh
 ```
 
 ## git config
