@@ -20,14 +20,41 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-if command -v gls >/dev/null 2>&1; then
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza --icons=auto --group-directories-first'
+  alias ll='eza -alh --icons=auto --git --group-directories-first'
+  alias lt='eza --tree --level=2 --icons=auto --git --group-directories-first'
+  alias lt2='eza --tree --level=2 --icons=auto --git --group-directories-first'
+  alias lt3='eza --tree --level=3 --icons=auto --git --group-directories-first'
+elif command -v gls >/dev/null 2>&1; then
   alias ll='gls -alF --color=auto'
 else
   alias ll='ls -alG'
 fi
-alias grep='grep --color=auto'
+
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+
+if command -v atuin >/dev/null 2>&1; then
+  export ATUIN_NOBIND=1
+  eval "$(atuin init zsh)"
+fi
+
+if command -v fzf >/dev/null 2>&1; then
+  source <(fzf --zsh)
+fi
+
+if command -v ggrep >/dev/null 2>&1; then
+  alias grep='ggrep --color=auto'
+else
+  alias grep='grep --color=auto'
+fi
 ```
 
 ## homebrew
@@ -37,49 +64,61 @@ alias grep='grep --color=auto'
 
 # CLI 도구
 # wget: HTTP/FTP 다운로더
+# coreutils: GNU core 유틸 모음
+# grep: GNU grep
 # jq: JSON 파서/필터
-# fzf: 퍼지 파인더
-# zellij: 터미널 멀티플렉서 (tmux 대체)
-# tmux: 터미널 멀티플렉서 (macOS 기본 미포함 환경 대비)
-# mise: 개발 도구 버전 관리 (asdf 대체)
-# gh: GitHub CLI
-# lazygit: Git TUI 클라이언트
-# git-delta: Git diff 구문 강조
+# yq: YAML/JSON 프로세서 (jq 스타일)
 # ripgrep: 초고속 검색 (grep 대체)
+# ripgrep-all (rga): PDF/문서 포함 통합 검색
 # fd: 직관적인 파일 찾기 (find 대체)
+# fzf: 퍼지 파인더
 # eza: 모던 ls (아이콘/Git 상태)
 # bat: 구문 강조 cat
+# glow: 터미널 Markdown 뷰어
 # zoxide: 스마트 cd (디렉토리 학습)
-# btop: 시스템 모니터 (htop 대체)
-# dust: 디스크 사용량 시각화 (du 대체)
-# procs: 프로세스 뷰어 (ps 대체)
-# parallel: 작업 병렬 실행
-# yq: YAML/JSON 프로세서 (jq 스타일)
+# atuin: 셸 히스토리 검색/동기화
+# tmux: 터미널 멀티플렉서 (macOS 기본 미포함 환경 대비)
+# zellij: 터미널 멀티플렉서 (tmux 대체)
+# gh: GitHub CLI
+# lazygit: Git TUI 클라이언트
+# yazi: 모던 터미널 파일 매니저
+# git-delta: Git diff 구문 강조
+# mise: 개발 도구 버전 관리 (asdf 대체)
 # uv: 빠른 Python 패키지/가상환경 관리
 # shellcheck: 쉘 스크립트 정적 분석
+# parallel: 작업 병렬 실행
+# procs: 프로세스 뷰어 (ps 대체)
+# btop: 시스템 모니터 (htop 대체)
+# dust: 디스크 사용량 시각화 (du 대체)
 # bitwarden-cli: 비밀번호 관리자 CLI
 brew install \
   wget \
+  coreutils \
+  grep \
   jq \
-  fzf \
-  zellij \
-  tmux \
-  mise \
-  gh \
-  lazygit \
-  git-delta \
+  yq \
   ripgrep \
+  ripgrep-all \
   fd \
+  fzf \
   eza \
   bat \
+  glow \
   zoxide \
-  btop \
-  dust \
-  procs \
-  parallel \
-  yq \
+  atuin \
+  tmux \
+  zellij \
+  gh \
+  lazygit \
+  yazi \
+  git-delta \
+  mise \
   uv \
   shellcheck \
+  parallel \
+  procs \
+  btop \
+  dust \
   bitwarden-cli
 
 # GUI 앱
@@ -123,6 +162,27 @@ curl -fLo ~/.config/zellij/layouts/agent.kdl --create-dirs \
 zellij -l agent
 ```
 
+## tmux
+
+```sh
+curl -fLo ~/.config/tmux/tmux.conf --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux.conf
+
+curl -fLo ~/.config/tmux/scripts/statusbar.sh --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_scripts_statusbar.sh
+
+curl -fLo ~/.config/tmux/layouts/agent.conf --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_agent.conf
+
+curl -fLo ~/.config/tmux/layouts/4.conf --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_4.conf
+
+curl -fLo ~/.config/tmux/layouts/9.conf --create-dirs \
+  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_9.conf
+
+chmod +x ~/.config/tmux/scripts/statusbar.sh
+```
+
 ## AstroNvim
 
 ```sh
@@ -151,7 +211,7 @@ rm -rf ~/.config/nvim/.git
 ## vimrc
 
 ```sh
-curl -LSso ~/.vimrc https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/vimrc
+curl -fLo ~/.vimrc https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/vimrc
 ```
 
 ## [vim-plug](https://github.com/junegunn/vim-plug)
@@ -160,27 +220,6 @@ curl -LSso ~/.vimrc https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads
 ```sh
 curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-```
-
-## tmux
-
-```sh
-curl -fLo ~/.config/tmux/tmux.conf --create-dirs \
-  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux.conf
-
-curl -fLo ~/.config/tmux/scripts/statusbar.sh --create-dirs \
-  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_scripts_statusbar.sh
-
-curl -fLo ~/.config/tmux/layouts/agent.conf --create-dirs \
-  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_agent.conf
-
-curl -fLo ~/.config/tmux/layouts/4.conf --create-dirs \
-  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_4.conf
-
-curl -fLo ~/.config/tmux/layouts/9.conf --create-dirs \
-  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_9.conf
-
-chmod +x ~/.config/tmux/scripts/statusbar.sh
 ```
 
 ## git config
