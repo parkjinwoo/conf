@@ -59,107 +59,69 @@ fi
 
 ## homebrew
 
-```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```zsh
+if ! command -v brew >/dev/null 2>&1; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
 
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+brew bundle --file=- <<'BREWFILE'
 # CLI 도구
-# wget: HTTP/FTP 다운로더
-# coreutils: GNU core 유틸 모음
-# grep: GNU grep
-# jq: JSON 파서/필터
-# yq: YAML/JSON 프로세서 (jq 스타일)
-# ripgrep: 초고속 검색 (grep 대체)
-# ripgrep-all (rga): PDF/문서 포함 통합 검색
-# fd: 직관적인 파일 찾기 (find 대체)
-# fzf: 퍼지 파인더
-# eza: 모던 ls (아이콘/Git 상태)
-# bat: 구문 강조 cat
-# glow: 터미널 Markdown 뷰어
-# zoxide: 스마트 cd (디렉토리 학습)
-# atuin: 셸 히스토리 검색/동기화
-# tmux: 터미널 멀티플렉서 (macOS 기본 미포함 환경 대비)
-# zellij: 터미널 멀티플렉서 (tmux 대체)
-# gh: GitHub CLI
-# lazygit: Git TUI 클라이언트
-# yazi: 모던 터미널 파일 매니저
-# git-delta: Git diff 구문 강조
-# mise: 개발 도구 버전 관리 (asdf 대체)
-# uv: 빠른 Python 패키지/가상환경 관리
-# shellcheck: 쉘 스크립트 정적 분석
-# parallel: 작업 병렬 실행
-# procs: 프로세스 뷰어 (ps 대체)
-# btop: 시스템 모니터 (htop 대체)
-# dust: 디스크 사용량 시각화 (du 대체)
-# bitwarden-cli: 비밀번호 관리자 CLI
-brew install \
-  wget \
-  coreutils \
-  grep \
-  jq \
-  yq \
-  ripgrep \
-  ripgrep-all \
-  fd \
-  fzf \
-  eza \
-  bat \
-  glow \
-  zoxide \
-  atuin \
-  tmux \
-  zellij \
-  gh \
-  lazygit \
-  yazi \
-  git-delta \
-  mise \
-  uv \
-  shellcheck \
-  parallel \
-  procs \
-  btop \
-  dust \
-  bitwarden-cli
+brew "wget" # HTTP/FTP 다운로더
+brew "coreutils" # GNU core 유틸 모음
+brew "grep" # GNU grep
+brew "jq" # JSON 파서/필터
+brew "yq" # YAML/JSON 프로세서 (jq 스타일)
+brew "parallel" # 작업 병렬 실행
+brew "ripgrep" # 초고속 검색 (grep 대체)
+brew "ripgrep-all" # PDF/문서 포함 통합 검색
+brew "fd" # 직관적인 파일 찾기 (find 대체)
+brew "fzf" # 퍼지 파인더
+brew "eza" # 모던 ls (아이콘/Git 상태)
+brew "bat" # 구문 강조 cat
+brew "glow" # 터미널 Markdown 뷰어
+brew "yazi" # 모던 터미널 파일 매니저
+brew "zoxide" # 스마트 cd (디렉토리 학습)
+brew "atuin" # 셸 히스토리 검색/동기화
+brew "gh" # GitHub CLI
+brew "lazygit" # Git TUI 클라이언트
+brew "git-delta" # Git diff 구문 강조
+brew "mise" # 개발 도구 버전 관리 (asdf 대체)
+brew "uv" # 빠른 Python 패키지/가상환경 관리
+brew "neovim" # 모던 Vim 계열 에디터
+brew "tree-sitter-cli" # Tree-sitter 파서 생성 도구
+brew "shellcheck" # 쉘 스크립트 정적 분석
+brew "tmux" # 터미널 멀티플렉서 (macOS 기본 미포함 환경 대비)
+brew "zellij" # 터미널 멀티플렉서 (tmux 대체)
+brew "procs" # 프로세스 뷰어 (ps 대체)
+brew "btop" # 시스템 모니터 (htop 대체)
+brew "dust" # 디스크 사용량 시각화 (du 대체)
+brew "bitwarden-cli" # 비밀번호 관리자 CLI
 
 # GUI 앱
-# google-chrome: 크롬 브라우저
-# firefox: 파이어폭스 브라우저
-# naver-whale: 웨일 브라우저
-# rectangle: 윈도우 창 관리 (단축키)
-# visual-studio-code: 코드 에디터
-# zed: 초고속 코드 에디터 (Rust 기반)
-# bitwarden: 비밀번호 관리자
-# notion: 노트/문서 협업 도구
-# obsidian: 로컬 우선 노트/지식관리 도구
-# ghostty: GPU 가속 터미널
-# wezterm: Lua 설정 가능한 GPU 가속 터미널
-brew install --cask \
-  google-chrome \
-  firefox \
-  naver-whale \
-  rectangle \
-  visual-studio-code \
-  zed \
-  bitwarden \
-  notion \
-  obsidian \
-  ghostty \
-  wezterm
+cask "google-chrome" # 크롬 브라우저
+cask "firefox" # 파이어폭스 브라우저
+cask "naver-whale" # 웨일 브라우저
+cask "ghostty" # GPU 가속 터미널
+cask "wezterm" # Lua 설정 가능한 GPU 가속 터미널
+cask "visual-studio-code" # 코드 에디터
+cask "zed" # 초고속 코드 에디터 (Rust 기반)
+cask "rectangle" # 윈도우 창 관리 (단축키)
+cask "bitwarden" # 비밀번호 관리자
+cask "notion" # 노트/문서 협업 도구
+cask "obsidian" # 로컬 우선 노트/지식관리 도구
+BREWFILE
 ```
 
 ## ghostty
 ```sh
 curl -fLo ~/.config/ghostty/config --create-dirs \
     https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/ghostty_config
-```
-
-## zellij
-
-```sh
-curl -fLo ~/.config/zellij/layouts/agent.kdl --create-dirs \
-    https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/zellij-agent-layout.kdl
-
-zellij -l agent
 ```
 
 ## tmux
@@ -171,29 +133,27 @@ curl -fLo ~/.config/tmux/tmux.conf --create-dirs \
 curl -fLo ~/.config/tmux/scripts/statusbar.sh --create-dirs \
   https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_scripts_statusbar.sh
 
-curl -fLo ~/.config/tmux/layouts/agent.conf --create-dirs \
-  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_agent.conf
-
-curl -fLo ~/.config/tmux/layouts/4.conf --create-dirs \
-  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_4.conf
-
-curl -fLo ~/.config/tmux/layouts/9.conf --create-dirs \
-  https://raw.githubusercontent.com/parkjinwoo/conf/refs/heads/main/tmux_layouts_9.conf
-
 chmod +x ~/.config/tmux/scripts/statusbar.sh
+```
+
+## Nerd Fonts
+
+https://www.nerdfonts.com/font-downloads
+
+```sh
+# 공식 형식: brew install --cask font-<FONT NAME>-nerd-font
+brew install --cask font-jetbrains-mono-nerd-font
+
+# 전체 설치
+brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install --cask {} || true
 ```
 
 ## AstroNvim
 
-```sh
-## Requirements
-brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install --cask {} || true
-brew install neovim
-brew install tree-sitter-cli
+필수인 `neovim`, `tree-sitter-cli`와 선택 도구인 `ripgrep`, `lazygit`은 Homebrew 목록에 포함되어 있습니다.
 
+```sh
 ## Optional Requirements
-brew install ripgrep
-brew install lazygit
 brew install gdu
 brew install bottom
 
