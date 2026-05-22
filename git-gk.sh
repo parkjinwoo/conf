@@ -27,15 +27,15 @@ REMAINING_ARGS=()
 
 # Parse global options
 parse_global_opts() {
+    REMAINING_ARGS=()
     while [ $# -gt 0 ]; do
         case "$1" in
             -n|--dry-run) DRY_RUN=true; shift ;;
             -v|--verbose) VERBOSE=true; shift ;;
-            --) shift; break ;;
-            *) break ;;
+            --) shift; REMAINING_ARGS+=("$@"); break ;;
+            *) REMAINING_ARGS+=("$1"); shift ;;
         esac
     done
-    REMAINING_ARGS=("$@")
 }
 
 # Run git command with output
@@ -91,7 +91,7 @@ detect_default_base() {
         fi
     fi
 
-    for candidate in develop main master; do
+    for candidate in main master develop; do
         if [ -n "$remote" ] && git show-ref --verify --quiet "refs/remotes/$remote/$candidate"; then
             echo "$candidate"
             return 0
@@ -102,7 +102,7 @@ detect_default_base() {
         fi
     done
 
-    echo "develop"
+    echo "main"
 }
 
 is_protected_branch() {
@@ -114,6 +114,76 @@ is_protected_branch() {
         fi
     done
     return 1
+}
+
+is_positive_int() {
+    [[ "$1" =~ ^[0-9]+$ ]] && [ "$1" -gt 0 ]
+}
+
+fetch_remote_branch() {
+    local remote="$1"
+    local branch="$2"
+    run_git fetch --prune "$remote" "+refs/heads/$branch:refs/remotes/$remote/$branch"
+}
+
+resolve_base_ref() {
+    local base_input="$1"
+    local remote="$2"
+
+    RESOLVED_BASE_REF=""
+    RESOLVED_FETCH_REMOTE=""
+    RESOLVED_FETCH_BRANCH=""
+
+    if [[ "$base_input" == */* ]]; then
+        if git show-ref --verify --quiet "refs/remotes/$base_input"; then
+            RESOLVED_BASE_REF="$base_input"
+            RESOLVED_FETCH_REMOTE="${base_input%%/*}"
+            RESOLVED_FETCH_BRANCH="${base_input#*/}"
+        elif git show-ref --verify --quiet "refs/heads/$base_input"; then
+            RESOLVED_BASE_REF="$base_input"
+        else
+            return 1
+        fi
+    elif [ -n "$remote" ] && git show-ref --verify --quiet "refs/remotes/$remote/$base_input"; then
+        RESOLVED_BASE_REF="$remote/$base_input"
+        RESOLVED_FETCH_REMOTE="$remote"
+        RESOLVED_FETCH_BRANCH="$base_input"
+    elif git show-ref --verify --quiet "refs/heads/$base_input"; then
+        RESOLVED_BASE_REF="$base_input"
+    else
+        return 1
+    fi
+
+    return 0
+}
+
+confirm_or_abort() {
+    local message="$1"
+    local answer
+
+    if [ "$DRY_RUN" = true ]; then
+        return 0
+    fi
+
+    if [ ! -t 0 ]; then
+        echo -e "${RED}Error: 확인 입력을 받을 수 없습니다. 계속하려면 --yes를 사용하세요.${NC}"
+        return 1
+    fi
+
+    printf "%b" "${YELLOW}${message} [y/N] ${NC}"
+    read -r answer
+    case "$answer" in
+        y|Y|yes|YES) return 0 ;;
+        *) echo "취소했습니다."; return 1 ;;
+    esac
+}
+
+path_tracked_in_head() {
+    git ls-tree -r --name-only HEAD -- "$1" | grep -q .
+}
+
+path_staged_in_index() {
+    git diff --cached --name-only -- "$1" | grep -q .
 }
 
 # prune: 원격에서 삭제된 브랜치 정리
@@ -135,7 +205,9 @@ cmd_prune() {
     fi
 
     echo "삭제될 추적 브랜치:"
-    echo "$STALE" | sed 's/.*\[would prune\]/  -/'
+    while IFS= read -r stale_branch; do
+        echo "  -${stale_branch#*"[would prune]"}"
+    done <<< "$STALE"
     echo ""
 
     run_git fetch "$REMOTE" --prune
@@ -144,7 +216,6 @@ cmd_prune() {
 # clean: 머지된 브랜치 삭제
 cmd_clean() {
     local BASE_INPUT="${1:-$DEFAULT_BASE}"
-    local BASE="$BASE_INPUT"
     local REMOTE="$DEFAULT_REMOTE"
     local TARGET_REF=""
     local FETCH_REMOTE=""
@@ -152,30 +223,19 @@ cmd_clean() {
     local CURRENT
     local MERGED=""
 
-    if [[ "$BASE_INPUT" == */* ]]; then
-        if git show-ref --verify --quiet "refs/remotes/$BASE_INPUT"; then
-            TARGET_REF="$BASE_INPUT"
-            FETCH_REMOTE="${BASE_INPUT%%/*}"
-            FETCH_BRANCH="${BASE_INPUT#*/}"
-        elif git show-ref --verify --quiet "refs/heads/$BASE_INPUT"; then
-            TARGET_REF="$BASE_INPUT"
-        fi
-    elif [ -n "$REMOTE" ] && git show-ref --verify --quiet "refs/remotes/$REMOTE/$BASE_INPUT"; then
-        TARGET_REF="$REMOTE/$BASE_INPUT"
-        FETCH_REMOTE="$REMOTE"
-        FETCH_BRANCH="$BASE_INPUT"
-    elif git show-ref --verify --quiet "refs/heads/$BASE"; then
-        TARGET_REF="$BASE"
-    else
+    if ! resolve_base_ref "$BASE_INPUT" "$REMOTE"; then
         echo -e "${RED}Error: 기준 브랜치를 찾을 수 없습니다: $BASE_INPUT${NC}"
         return 1
     fi
+    TARGET_REF="$RESOLVED_BASE_REF"
+    FETCH_REMOTE="$RESOLVED_FETCH_REMOTE"
+    FETCH_BRANCH="$RESOLVED_FETCH_BRANCH"
 
     echo -e "${GREEN}[clean]${NC} ${TARGET_REF}에 머지된 브랜치 삭제"
     echo ""
 
     if [ -n "$FETCH_REMOTE" ] && [ -n "$FETCH_BRANCH" ]; then
-        run_git fetch "$FETCH_REMOTE" "$FETCH_BRANCH"
+        fetch_remote_branch "$FETCH_REMOTE" "$FETCH_BRANCH"
     fi
 
     CURRENT=$(git branch --show-current)
@@ -215,18 +275,45 @@ cmd_clean() {
 # squash: 커밋 합치기
 cmd_squash() {
     local BASE_INPUT="${1:-$DEFAULT_BASE}"
-    local BASE_REF="$BASE_INPUT"
-
-    if [[ "$BASE_INPUT" != */* ]]; then
-        if [ -n "$DEFAULT_REMOTE" ] && git show-ref --verify --quiet "refs/remotes/$DEFAULT_REMOTE/$BASE_INPUT"; then
-            BASE_REF="$DEFAULT_REMOTE/$BASE_INPUT"
-        fi
-    fi
+    local REMOTE="$DEFAULT_REMOTE"
+    local BASE_REF=""
+    local FETCH_REMOTE=""
+    local FETCH_BRANCH=""
+    local CURRENT
+    local MERGE_BASE
+    local COUNT
 
     CURRENT=$(git branch --show-current)
+    if [ -z "$CURRENT" ]; then
+        echo -e "${RED}Error: detached HEAD 상태에서는 squash 할 수 없습니다${NC}"
+        return 1
+    fi
+
+    if is_protected_branch "$CURRENT"; then
+        echo -e "${RED}Error: 보호된 브랜치에서는 squash 하지 않습니다: $CURRENT${NC}"
+        return 1
+    fi
+
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo -e "${RED}Error: 커밋되지 않은 tracked 변경사항이 있습니다. 먼저 commit/stash 하세요.${NC}"
+        return 1
+    fi
+
+    if ! resolve_base_ref "$BASE_INPUT" "$REMOTE"; then
+        echo -e "${RED}Error: 기준 브랜치를 찾을 수 없습니다: $BASE_INPUT${NC}"
+        return 1
+    fi
+    BASE_REF="$RESOLVED_BASE_REF"
+    FETCH_REMOTE="$RESOLVED_FETCH_REMOTE"
+    FETCH_BRANCH="$RESOLVED_FETCH_BRANCH"
+
+    if [ -n "$FETCH_REMOTE" ] && [ -n "$FETCH_BRANCH" ]; then
+        fetch_remote_branch "$FETCH_REMOTE" "$FETCH_BRANCH"
+    fi
+
     MERGE_BASE=$(git merge-base HEAD "$BASE_REF" 2>/dev/null) || {
         echo -e "${RED}Error: $BASE_REF 를 찾을 수 없습니다${NC}"
-        exit 1
+        return 1
     }
     COUNT=$(git rev-list --count "${MERGE_BASE}..HEAD")
 
@@ -257,19 +344,24 @@ cmd_squash() {
 cmd_stale() {
     local DAYS="${1:-90}"
     local REMOTE="$DEFAULT_REMOTE"
+    if ! is_positive_int "$DAYS"; then
+        echo -e "${RED}Error: 일수는 1 이상의 숫자여야 합니다: $DAYS${NC}"
+        return 1
+    fi
+
     echo -e "${GREEN}[stale]${NC} ${DAYS}일 이상 활동 없는 브랜치"
     echo ""
 
     # macOS/Linux 호환
     if date -v-1d &>/dev/null; then
-        CUTOFF=$(date -v-${DAYS}d +%Y-%m-%d)
+        CUTOFF=$(date -v-"${DAYS}"d +%Y-%m-%d)
     else
         CUTOFF=$(date -d "${DAYS} days ago" +%Y-%m-%d)
     fi
 
     echo "로컬 브랜치:"
     git for-each-ref --sort=committerdate --format='%(committerdate:short)|%(refname:short)|%(authorname)' refs/heads/ | \
-    while IFS='|' read date branch author; do
+    while IFS='|' read -r date branch author; do
         if [[ "$date" < "$CUTOFF" ]]; then
             echo -e "  ${RED}$date${NC}  $branch  ${CYAN}[$author]${NC}"
         fi
@@ -280,7 +372,7 @@ cmd_stale() {
         echo "원격 브랜치 ($REMOTE):"
         git for-each-ref --sort=committerdate --format='%(committerdate:short)|%(refname:short)|%(authorname)' "refs/remotes/$REMOTE/" | \
         grep -v HEAD | \
-        while IFS='|' read date branch author; do
+        while IFS='|' read -r date branch author; do
             [ "$branch" = "$REMOTE" ] && continue
             [ "$branch" = "$REMOTE/HEAD" ] && continue
             if [[ "$date" < "$CUTOFF" ]]; then
@@ -303,7 +395,17 @@ cmd_log() {
     for arg in "$@"; do
         case "$arg" in
             -a|--all) ALL_FLAG="--all" ;;
-            [0-9]*) COUNT="$arg" ;;
+            [0-9]*)
+                if ! is_positive_int "$arg"; then
+                    echo -e "${RED}Error: 로그 개수는 1 이상의 숫자여야 합니다: $arg${NC}"
+                    return 1
+                fi
+                COUNT="$arg"
+                ;;
+            *)
+                echo -e "${RED}Error: 알 수 없는 log 인자입니다: $arg${NC}"
+                return 1
+                ;;
         esac
     done
 
@@ -323,12 +425,8 @@ cmd_status() {
     CURRENT=$(git branch --show-current)
     echo "현재 브랜치: $CURRENT"
 
-    if [[ "$BASE" == */* ]]; then
-        BASE_REF="$BASE"
-    elif [ -n "$REMOTE" ] && git show-ref --verify --quiet "refs/remotes/$REMOTE/$BASE"; then
-        BASE_REF="$REMOTE/$BASE"
-    elif git show-ref --verify --quiet "refs/heads/$BASE"; then
-        BASE_REF="$BASE"
+    if resolve_base_ref "$BASE" "$REMOTE"; then
+        BASE_REF="$RESOLVED_BASE_REF"
     fi
 
     if [ -n "$BASE_REF" ]; then
@@ -340,12 +438,17 @@ cmd_status() {
     fi
     echo ""
 
-    run_git branch -vv
+    git branch -vv
 }
 
 # recent: 최근 작업 브랜치
 cmd_recent() {
     local COUNT="${1:-10}"
+    if ! is_positive_int "$COUNT"; then
+        echo -e "${RED}Error: 표시 개수는 1 이상의 숫자여야 합니다: $COUNT${NC}"
+        return 1
+    fi
+
     echo -e "${GREEN}[recent]${NC} 최근 체크아웃한 브랜치"
     echo ""
 
@@ -361,39 +464,30 @@ cmd_recent() {
 cmd_sync() {
     local BASE_INPUT="${1:-$DEFAULT_BASE}"
     local REMOTE="$DEFAULT_REMOTE"
-    local BASE="$BASE_INPUT"
     local TARGET_REF=""
     local FETCH_REMOTE=""
     local FETCH_BRANCH=""
-    local CURRENT=$(git branch --show-current)
+    local CURRENT
+    CURRENT=$(git branch --show-current)
 
-    if [[ "$BASE_INPUT" == */* ]]; then
-        if git show-ref --verify --quiet "refs/remotes/$BASE_INPUT"; then
-            TARGET_REF="$BASE_INPUT"
-            FETCH_REMOTE="${BASE_INPUT%%/*}"
-            FETCH_BRANCH="${BASE_INPUT#*/}"
-        elif git show-ref --verify --quiet "refs/heads/$BASE_INPUT"; then
-            TARGET_REF="$BASE_INPUT"
-        else
-            echo -e "${RED}Error: 기준 브랜치를 찾을 수 없습니다: $BASE_INPUT${NC}"
-            return 1
-        fi
-    elif [ -n "$REMOTE" ] && git show-ref --verify --quiet "refs/remotes/$REMOTE/$BASE_INPUT"; then
-        TARGET_REF="$REMOTE/$BASE_INPUT"
-        FETCH_REMOTE="$REMOTE"
-        FETCH_BRANCH="$BASE_INPUT"
-    elif git show-ref --verify --quiet "refs/heads/$BASE_INPUT"; then
-        TARGET_REF="$BASE_INPUT"
-    else
+    if ! git diff --quiet || ! git diff --cached --quiet; then
+        echo -e "${RED}Error: 커밋되지 않은 tracked 변경사항이 있습니다. 먼저 commit/stash 하세요.${NC}"
+        return 1
+    fi
+
+    if ! resolve_base_ref "$BASE_INPUT" "$REMOTE"; then
         echo -e "${RED}Error: 기준 브랜치를 찾을 수 없습니다: $BASE_INPUT${NC}"
         return 1
     fi
+    TARGET_REF="$RESOLVED_BASE_REF"
+    FETCH_REMOTE="$RESOLVED_FETCH_REMOTE"
+    FETCH_BRANCH="$RESOLVED_FETCH_BRANCH"
 
     echo -e "${GREEN}[sync]${NC} ${CURRENT}를 ${TARGET_REF}와 동기화"
     echo ""
 
     if [ -n "$FETCH_REMOTE" ] && [ -n "$FETCH_BRANCH" ]; then
-        run_git fetch "$FETCH_REMOTE" "$FETCH_BRANCH"
+        fetch_remote_branch "$FETCH_REMOTE" "$FETCH_BRANCH"
     fi
     run_git rebase "$TARGET_REF"
 }
@@ -401,6 +495,11 @@ cmd_sync() {
 # info: 브랜치 상세 정보
 cmd_info() {
     local BRANCH="${1:-$(git branch --show-current)}"
+    local BASE_REF=""
+    local TRACKING
+    local AHEAD
+    local BEHIND
+    local COMMITS
     echo -e "${GREEN}[info]${NC} ${BRANCH} 브랜치 정보"
     echo ""
 
@@ -411,13 +510,13 @@ cmd_info() {
     fi
 
     # 트래킹 정보
-    local TRACKING=$(git for-each-ref --format='%(upstream:short)' "refs/heads/$BRANCH")
+    TRACKING=$(git for-each-ref --format='%(upstream:short)' "refs/heads/$BRANCH")
     echo "트래킹: ${TRACKING:-없음}"
 
     # ahead/behind
     if [ -n "$TRACKING" ]; then
-        local AHEAD=$(git rev-list --count "$TRACKING..$BRANCH" 2>/dev/null || echo 0)
-        local BEHIND=$(git rev-list --count "$BRANCH..$TRACKING" 2>/dev/null || echo 0)
+        AHEAD=$(git rev-list --count "$TRACKING..$BRANCH" 2>/dev/null || echo 0)
+        BEHIND=$(git rev-list --count "$BRANCH..$TRACKING" 2>/dev/null || echo 0)
         echo "상태: ↑${AHEAD} ↓${BEHIND}"
     fi
 
@@ -428,23 +527,26 @@ cmd_info() {
 
     # 생성 시점 (대략적)
     local MERGE_BASE=""
-    if [ -n "$DEFAULT_REMOTE" ]; then
-        MERGE_BASE=$(git merge-base "$BRANCH" "${DEFAULT_REMOTE}/main" 2>/dev/null || git merge-base "$BRANCH" "${DEFAULT_REMOTE}/master" 2>/dev/null || echo "")
-    else
-        MERGE_BASE=$(git merge-base "$BRANCH" "main" 2>/dev/null || git merge-base "$BRANCH" "master" 2>/dev/null || echo "")
+    if resolve_base_ref "$DEFAULT_BASE" "$DEFAULT_REMOTE"; then
+        BASE_REF="$RESOLVED_BASE_REF"
+        MERGE_BASE=$(git merge-base "$BRANCH" "$BASE_REF" 2>/dev/null || echo "")
     fi
     if [ -n "$MERGE_BASE" ]; then
-        local COMMITS=$(git rev-list --count "$MERGE_BASE..$BRANCH")
+        COMMITS=$(git rev-list --count "$MERGE_BASE..$BRANCH")
         echo ""
-        echo "main과의 차이: ${COMMITS}개 커밋"
+        echo "${BASE_REF}와의 차이: ${COMMITS}개 커밋"
     fi
 }
 
 # delete: 안전한 브랜치 삭제
 cmd_delete() {
-    local BRANCH="$1"
+    local BRANCH=""
+    local REMOTE_BRANCH=""
+    local DELETE_REMOTE="$DEFAULT_REMOTE"
     local FORCE=false
     local REMOTE=false
+    local HAS_LOCAL=false
+    local HAS_REMOTE=false
 
     # 옵션 파싱
     for arg in "$@"; do
@@ -462,8 +564,19 @@ cmd_delete() {
         return 1
     fi
 
+    REMOTE_BRANCH="$BRANCH"
+    if [ "$REMOTE" = true ] && [[ "$BRANCH" == */* ]]; then
+        local branch_remote="${BRANCH%%/*}"
+        local branch_name="${BRANCH#*/}"
+        if git remote | grep -qx "$branch_remote"; then
+            DELETE_REMOTE="$branch_remote"
+            REMOTE_BRANCH="$branch_name"
+        fi
+    fi
+
     # 현재 브랜치 체크
-    local CURRENT=$(git branch --show-current)
+    local CURRENT
+    CURRENT=$(git branch --show-current)
     if [ "$BRANCH" = "$CURRENT" ]; then
         echo -e "${RED}Error: 현재 브랜치는 삭제할 수 없습니다${NC}"
         return 1
@@ -475,22 +588,34 @@ cmd_delete() {
         return 1
     fi
 
+    if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+        HAS_LOCAL=true
+    fi
+    if [ -n "$DELETE_REMOTE" ] && git show-ref --verify --quiet "refs/remotes/$DELETE_REMOTE/$REMOTE_BRANCH"; then
+        HAS_REMOTE=true
+    fi
+
+    if [ "$HAS_LOCAL" = false ] && { [ "$REMOTE" = false ] || [ "$HAS_REMOTE" = false ]; }; then
+        echo -e "${RED}Error: 삭제할 브랜치를 찾을 수 없습니다: $BRANCH${NC}"
+        return 1
+    fi
+
     echo -e "${GREEN}[delete]${NC} 브랜치 삭제: $BRANCH"
     echo ""
 
     # 브랜치 정보 표시
-    if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+    if [ "$HAS_LOCAL" = true ]; then
         echo "로컬 브랜치:"
         git log -1 --format="  %h %s (%cr)" "$BRANCH"
     fi
 
-    if [ -n "$DEFAULT_REMOTE" ] && git show-ref --verify --quiet "refs/remotes/$DEFAULT_REMOTE/$BRANCH"; then
-        echo "원격 브랜치: $DEFAULT_REMOTE/$BRANCH"
+    if [ "$HAS_REMOTE" = true ]; then
+        echo "원격 브랜치: $DELETE_REMOTE/$REMOTE_BRANCH"
     fi
     echo ""
 
     # 로컬 삭제
-    if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+    if [ "$HAS_LOCAL" = true ]; then
         if [ "$FORCE" = true ]; then
             run_git branch -D "$BRANCH"
         else
@@ -500,10 +625,12 @@ cmd_delete() {
 
     # 원격 삭제
     if [ "$REMOTE" = true ]; then
-        if [ -z "$DEFAULT_REMOTE" ]; then
+        if [ -z "$DELETE_REMOTE" ]; then
             echo -e "${YELLOW}원격이 없어 원격 브랜치를 삭제할 수 없습니다.${NC}"
-        elif git show-ref --verify --quiet "refs/remotes/$DEFAULT_REMOTE/$BRANCH"; then
-            run_git push "$DEFAULT_REMOTE" --delete "$BRANCH"
+        elif [ "$HAS_REMOTE" = true ]; then
+            run_git push "$DELETE_REMOTE" --delete "$REMOTE_BRANCH"
+        else
+            echo -e "${YELLOW}원격 브랜치를 찾을 수 없습니다: $DELETE_REMOTE/$REMOTE_BRANCH${NC}"
         fi
     fi
 }
@@ -515,7 +642,8 @@ cmd_switch() {
     # 인자 없으면 fzf 또는 목록 표시
     if [ -z "$PATTERN" ]; then
         if command -v fzf &>/dev/null; then
-            local SELECTED=$(git branch --format='%(refname:short)' | fzf --height=40% --reverse)
+            local SELECTED
+            SELECTED=$(git branch --format='%(refname:short)' | fzf --height=40% --reverse)
             if [ -n "$SELECTED" ]; then
                 run_git checkout "$SELECTED"
             fi
@@ -536,8 +664,10 @@ cmd_switch() {
     fi
 
     # 패턴 매칭
-    local MATCHES=$(git branch --format='%(refname:short)' | grep -iF -- "$PATTERN" || true)
-    local COUNT=$(echo "$MATCHES" | grep -c . || echo 0)
+    local MATCHES
+    local COUNT
+    MATCHES=$(git branch --format='%(refname:short)' | grep -iF -- "$PATTERN" || true)
+    COUNT=$(echo "$MATCHES" | grep -c . || echo 0)
 
     if [ "$COUNT" -eq 0 ]; then
         echo -e "${RED}Error: '$PATTERN' 패턴과 일치하는 브랜치가 없습니다${NC}"
@@ -555,13 +685,20 @@ cmd_switch() {
 # undo: 실수 복구
 cmd_undo() {
     local MODE="soft"
+    local YES=false
 
     for arg in "$@"; do
         case "$arg" in
             --hard) MODE="hard" ;;
             --soft) MODE="soft" ;;
+            -y|--yes) YES=true ;;
         esac
     done
+
+    if ! git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+        echo -e "${RED}Error: 취소할 이전 커밋이 없습니다${NC}"
+        return 1
+    fi
 
     echo -e "${GREEN}[undo]${NC} 마지막 커밋 취소 (--$MODE)"
     echo ""
@@ -572,6 +709,9 @@ cmd_undo() {
     echo ""
 
     if [ "$MODE" = "hard" ]; then
+        if [ "$YES" = false ]; then
+            confirm_or_abort "마지막 커밋과 작업 트리 변경사항을 삭제할까요?" || return 1
+        fi
         run_git reset --hard HEAD~1
     else
         run_git reset --soft HEAD~1
@@ -586,6 +726,7 @@ cmd_undo() {
 cmd_discard() {
     local ALL=false
     local STAGED=false
+    local YES=false
     local FILES=()
 
     # 옵션 파싱
@@ -593,6 +734,7 @@ cmd_discard() {
         case "$arg" in
             -a|--all) ALL=true ;;
             -s|--staged) STAGED=true ;;
+            -y|--yes) YES=true ;;
             -*) ;;
             *) FILES+=("$arg") ;;
         esac
@@ -611,13 +753,22 @@ cmd_discard() {
 
     # 변경사항 표시
     if [ "$ALL" = true ]; then
+        local STATUS_OUTPUT
+        STATUS_OUTPUT=$(git status --short)
+        if [ -z "$STATUS_OUTPUT" ]; then
+            echo "버릴 변경사항이 없습니다."
+            return 0
+        fi
+
         echo "버려질 변경사항:"
-        git status --short
+        echo "$STATUS_OUTPUT"
         echo ""
 
-        if [ "$STAGED" = true ]; then
-            run_git reset HEAD
+        if [ "$YES" = false ]; then
+            confirm_or_abort "전체 변경사항과 untracked 파일/디렉터리를 버릴까요?" || return 1
         fi
+
+        run_git reset HEAD
         run_git checkout -- .
         # untracked 파일/디렉터리도 함께 제거한다.
         run_git clean -fd
@@ -633,10 +784,22 @@ cmd_discard() {
         echo ""
 
         for file in "${FILES[@]}"; do
-            if git ls-files --error-unmatch "$file" &>/dev/null; then
-                if [ "$STAGED" = true ]; then
+            if [ "$STAGED" = true ]; then
+                if path_tracked_in_head "$file"; then
+                    run_git checkout HEAD -- "$file"
+                    if path_staged_in_index "$file"; then
+                        run_git reset HEAD "$file" 2>/dev/null || true
+                        run_git clean -fd -- "$file"
+                    fi
+                else
                     run_git reset HEAD "$file" 2>/dev/null || true
+                    if [ -e "$file" ]; then
+                        run_git clean -fd -- "$file"
+                    else
+                        echo -e "${YELLOW}  (건너뜀) $file${NC}"
+                    fi
                 fi
+            elif git ls-files --error-unmatch "$file" &>/dev/null; then
                 run_git checkout -- "$file"
             elif [ -e "$file" ]; then
                 # 지정한 untracked 파일/디렉터리는 clean으로 제거한다.
@@ -659,6 +822,7 @@ Git Kit v2
   -n, --dry-run    실제 실행하지 않고 명령만 출력
   -v, --verbose    상세 출력
   --               전역 옵션 파싱 종료 (이후 인자는 명령 인자로 전달)
+                   전역 옵션은 명령 앞/뒤 어디에 두어도 처리됨
 
 빠른 시작 예시:
   git gk -n clean
@@ -684,6 +848,7 @@ Git Kit v2
 
   squash [base]    현재 브랜치의 커밋들을 하나로 합치기 (soft reset)
                    기본값: 원격 HEAD 기준 자동 감지
+                   보호 브랜치와 커밋되지 않은 tracked 변경사항이 있으면 중단
                    예: git gk squash
                    예: git gk squash main
                    예: git gk squash origin/main
@@ -717,6 +882,7 @@ Git Kit v2
 
   sync [base]      현재 브랜치를 base와 동기화 (fetch + rebase)
                    기본값: 원격 HEAD 기준 자동 감지
+                   원격 base는 원격 추적 브랜치를 갱신한 뒤 사용
                    예: git gk sync origin/main
                    예: git gk sync
                    예: git gk sync main
@@ -745,22 +911,24 @@ Git Kit v2
 
   undo [--hard]    마지막 커밋 취소
                    기본: --soft (변경사항 유지)
-                   --hard: 변경사항도 삭제
+                   --hard: 변경사항도 삭제 (--yes 없으면 확인)
                    예: git gk undo
                    예: git gk undo --hard
+                   예: git gk undo --hard --yes
                    예: git gk -n undo --hard
 
   discard <file>   수정 사항 버리기 (커밋 전 변경사항 롤백)
                    --all, -a:
-                     tracked 수정사항 전체 롤백 + untracked 파일/디렉터리 삭제
+                     staged/unstaged tracked 변경 전체 롤백 + untracked 파일/디렉터리 삭제
                    --staged, -s:
-                     스테이징 해제 후 롤백 수행
-                     (파일 지정 시: 해당 파일들만, --all과 함께면 전체)
+                     파일 지정 시 스테이징 해제까지 포함
+                   --yes, -y:
+                     --all 실행 시 확인 질문 생략
                    예: git gk discard src/main.js
                    예: git gk discard src/a.js src/b.js
                    예: git gk discard src/main.js --staged
                    예: git gk discard --all
-                   예: git gk discard --all --staged
+                   예: git gk discard --all --yes
 
   help             이 도움말 표시
                    예: git gk help
@@ -794,7 +962,7 @@ Git log alias (빠른 접근용):
   git gk squash main       # main 기준 커밋 합치기
   git gk sync origin/main  # fetch + rebase
   git gk delete foo -f -r  # 로컬/원격 브랜치 강제 삭제
-  git gk discard --all -s  # 스테이징 포함 전체 롤백
+  git gk discard --all --yes  # 확인 없이 전체 롤백
 EOF
 }
 
